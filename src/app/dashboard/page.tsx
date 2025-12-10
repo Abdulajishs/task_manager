@@ -27,7 +27,7 @@ export default async function Dashboard() {
                     <div key={task.id} className="flex items-center gap-3 sm:gap-10">
                         <h2 className="w-[100px]">Task ID: {task.id}</h2>
                         <h2 className="w-[200px]">{task.title}</h2>
-                        <input type="checkbox" defaultChecked={task.isCompleted} readOnly />
+                        <input type="checkbox" defaultChecked={task.isCompleted} disabled />
                         <Link href={`/task/${task.id}`} className="text-grey-500 bg-blue-500 px-2 rounded-md cursor-pointer">Edit</Link>
                         <form action={deleteTaskAction}>
                             <input type="hidden" name="taskId" value={task.id} />

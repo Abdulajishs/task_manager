@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import EditForm from "./EditForm";
 import DeleteForm from "./DeleteForm";
-
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { Novu } from "@novu/node";
 export type TaskData ={ id: string, title: string, isCompleted: boolean }
 
@@ -19,6 +18,9 @@ export default async function EditTask({ params }: { params: { id: string } }) {
             redirect('/sign-in');
         }
 
+        const user = await currentUser();
+        const userEmail = user?.emailAddresses[0]?.emailAddress;
+
         const updateTitle = data.get('editing-title');
         const isCompleted = data.get('is-completed') === 'on' ? true : false;
 
@@ -33,9 +35,12 @@ export default async function EditTask({ params }: { params: { id: string } }) {
         console.log('Task updated:', updatedTask);
 
         const novu = new Novu(process.env.NOVU_SECRET_KEY!);
+
+        await novu.subscribers.identify(userId!,{email: userEmail})
+
         await novu.trigger("in-app-alert", {
             to: { subscriberId: userId! },
-            payload: { message: `The task "${updatedTask.title}" has been updated.` },
+            payload: { message: `The task "${updatedTask.title}" has been updated.`, title: updatedTask?.title },
         });
         
         redirect('/dashboard');
